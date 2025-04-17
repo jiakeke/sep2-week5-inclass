@@ -42,10 +42,18 @@ pipeline {
 
         stage('Build Docker Image') {
                     steps {
+                        //script {
+                        //    docker.build("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}")
+                        //}
                         script {
-                            docker.build("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}")
-                            // Or specify Dockerfile path explicitly if needed
-                            // docker.build("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}", "-f ./Dockerfile .")
+                            sh """
+                            docker buildx create --name mybuilder --use || true
+                            docker buildx inspect mybuilder || true
+                            """
+
+                            sh """
+                            docker buildx build --platform linux/amd64 --load -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} .
+                            """
                         }
                     }
                 }
